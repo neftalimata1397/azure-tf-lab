@@ -1,0 +1,9 @@
+# Ignorar los plugins pesados descargados por terraform init
+**/.terraform/*
+
+# Nunca subir archivos de estado locales (pueden tener datos sensibles)
+*.tfstate
+*.tfstate.*
+
+# Ignorar logs de errores
+crash.log
