@@ -50,5 +50,5 @@ redes = {
 }
 
 cloudflare_zone_id = "e32ffb8b1686b6a851adba0033e189fe"
-domain_name        = "tudominio.com"
+domain_name        = "sv-solution.com"
 subdomain          = "tools"
