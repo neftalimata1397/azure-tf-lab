@@ -111,3 +111,13 @@ resource "azurerm_linux_virtual_machine" "app_vm" {
   EOF
   )
 }
+
+# 4. REGISTRO DNS EN CLOUDFLARE (Multi-Cloud: conecta Azure con Cloudflare)
+resource "cloudflare_record" "app_dns" {
+  zone_id = var.cloudflare_zone_id
+  name    = var.subdomain
+  content = azurerm_public_ip.vm_pip.ip_address
+  type    = "A"
+  ttl     = 1    # 1 = Automático cuando proxied es true
+  proxied = true # Nube naranja activada: HTTPS gratis y oculta la IP de Azure
+}

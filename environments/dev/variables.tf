@@ -23,3 +23,19 @@ variable "redes" {
     }))
   }))
 }
+
+variable "cloudflare_zone_id" {
+  description = "Zone ID de tu dominio en Cloudflare"
+  type        = string
+}
+
+variable "domain_name" {
+  description = "Tu dominio raíz (ej. midominio.com)"
+  type        = string
+}
+
+variable "subdomain" {
+  description = "Subdominio para la app (ej. tools)"
+  type        = string
+  default     = "tools"
+}

@@ -48,3 +48,7 @@ redes = {
     nsg_rules     = []
   }
 }
+
+cloudflare_zone_id = "e32ffb8b1686b6a851adba0033e189fe"
+domain_name        = "tudominio.com"
+subdomain          = "tools"
