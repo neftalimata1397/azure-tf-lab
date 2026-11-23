@@ -1,29 +1,39 @@
-variable "resource_group_name" {
-  type        = string
-  description = "Nombre del Resource Group donde vivirá la red"
+variable "rg_name" {
+  type = string
 }
 
 variable "location" {
-  type        = string
-  description = "Región de Azure (ej. eastus2, mexicocentral)"
+  type = string
 }
 
-variable "env" {
-  type        = string
-  description = "Nombre del ambiente (dev, qa, prod) para nombrar recursos"
+variable "vnet_name" {
+  type = string
 }
 
-variable "vnet_cidr" {
-  type        = string
-  description = "Rango IP de la VNet (ej. 10.10.0.0/16)"
+variable "address_space" {
+  type = list(string)
 }
 
-variable "subnet_cidr" {
-  type        = string
-  description = "Rango IP de la Subred (ej. 10.10.1.0/24)"
+variable "subnet_name" {
+  type = string
 }
 
-variable "allowed_ip" {
-  type        = string
-  description = "Tu IP pública en formato CIDR (ej. 203.0.113.10/32)"
+variable "subnet_prefix" {
+  type = list(string)
+}
+
+variable "nsg_rules" {
+  description = "Lista de reglas personalizadas para el NSG"
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+  }))
+  default = []
 }
