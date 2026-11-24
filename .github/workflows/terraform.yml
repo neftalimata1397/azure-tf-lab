@@ -1,15 +1,15 @@
-name: Terraform Azure CI/CD
+name: Terraform Azure CI/CD (DevSecOps)
 
 on:
   pull_request:
-    branches: [ main ] # Al abrir PR -> solo corre PLAN
+    branches: [ main ]
   push:
-    branches: [ main ] # Al hacer merge o push a main -> corre APPLY
+    branches: [ main ]
 
-# OBLIGATORIO para OIDC: le da permiso a GitHub de pedir el token temporal a Azure
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -17,13 +17,14 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_USE_OIDC: true
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-  
+
 jobs:
   terraform:
+    name: Validar, Auditar y Desplegar
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./environments/dev
+        working-directory: environments/dev
 
     steps:
       - name: Clonar repositorio
@@ -32,12 +33,40 @@ jobs:
       - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # --- CAPA DEVSECOPS (Corre siempre, en PR y en main) ---
+      - name: Verificar formato (terraform fmt)
+        run: terraform fmt -check -recursive ../../
+        continue-on-error: true
+
+      - name: Instalar TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Ejecutar TFLint
+        run: |
+          tflint --init
+          tflint -f compact
+        continue-on-error: true
+
+      - name: Auditoría de seguridad con Trivy (IaC Scan)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '0' # En modo reporte para ver hallazgos sin bloquear hoy
+
+      # --- FLUJO TERRAFORM ---
       - name: Terraform Init
         run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
 
       - name: Terraform Plan
         run: terraform plan -no-color
 
+      # Solo aplica cambios si es un Merge/Push directo a main (nunca en PR)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
