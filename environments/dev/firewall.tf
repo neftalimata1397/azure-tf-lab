@@ -51,9 +51,25 @@ resource "azurerm_firewall_policy_rule_collection_group" "fw_rules" {
     rule {
       name                  = "allow-web-and-dns"
       protocols             = ["TCP", "UDP"]
-      source_addresses      = ["10.1.0.0/16"] # Segmento de spoke-app
+      source_addresses      = ["10.1.0.0/16"]
       destination_addresses = ["*"]
       destination_ports     = ["80", "443", "53"]
+    }
+  }
+
+  nat_rule_collection {
+    name     = "dnat-tools-inbound"
+    priority = 200
+    action   = "Dnat"
+
+    rule {
+      name                = "dnat-http-to-vm"
+      protocols           = ["TCP"]
+      source_addresses    = ["*"]
+      destination_address = azurerm_public_ip.fw_pip.ip_address
+      destination_ports   = ["80"]
+      translated_address  = azurerm_network_interface.vm_nic.private_ip_address
+      translated_port     = "80"
     }
   }
 }
